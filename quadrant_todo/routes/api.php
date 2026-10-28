@@ -21,7 +21,7 @@ Route::prefix('auth')->group(function () {
 });
 
 //todos endpoints
-Route::prefix('todos')->group(function () {
+Route::prefix('todos')->middleware('auth.token')->group(function () {
     Route::get('/', [TodoController::class, 'index']);
     Route::post('/', [TodoController::class, 'store']);
     Route::post('carry-over', [TodoController::class, 'bulkCarryOver']);

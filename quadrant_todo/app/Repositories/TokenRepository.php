@@ -21,4 +21,13 @@ class TokenRepository
     {
         return DB::table('auth_tokens')->where('token_hash', $tokenHash)->delete();
     }
+
+    public function findByHash(string $tokenHash): ?object{
+        return DB::table('auth_tokens')->where('token_hash', $tokenHash)->first();
+    }
+
+    public function deleteById(int $id): void
+    {
+        DB::table('auth_tokens')->where('id', $id)->delete();
+    }
 }

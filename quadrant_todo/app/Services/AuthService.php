@@ -7,6 +7,7 @@ use App\Repositories\TokenRepository;
 use App\Repositories\UserRepository;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Carbon;
 
 class AuthService
 {
@@ -64,7 +65,7 @@ class AuthService
 
         $this->tokens->create(
             $user->id,
-            hash('sha256', $token),
+            $this->hashToken($token),
             $expiresAt->toDateTimeString(),
         );
 
@@ -82,10 +83,38 @@ class AuthService
             throw ApiExceptions::unauthorized();
         }
 
-        $deleted = $this->tokens->deleteByHash(hash('sha256', $plainToken));
+        $deleted = $this->tokens->deleteByHash($this->hashToken($plainToken));
 
         if ($deleted === 0) {
             throw ApiExceptions::unauthorized();
         }
+    }
+    private function hashToken(string $plainToken): string
+    {
+        return hash('sha256', $plainToken);
+    }
+
+    //middleware service
+    public function authenticate(?string $plainToken): int
+    {
+
+    if ($plainToken === null || $plainToken === ''){
+        throw ApiExceptions::unauthorized();
+    }
+
+    $row = $this->tokens->findByHash($this->hashToken($plainToken));
+
+    if ($row === null) {
+        throw ApiExceptions::unauthorized();
+    }
+
+    //expiry. A dead row is deleted, then the request fails.
+    if (Carbon::parse($row->expires_at, 'UTC')->isPast()) {
+        $this->tokens->deleteById((int) $row->id);
+        throw ApiExceptions::unauthorized();
+    }
+
+    // The caller attaches this to the request (stage 5)
+    return (int) $row->user_id;
     }
 }
