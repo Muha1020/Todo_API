@@ -44,4 +44,8 @@ class ApiExceptions extends RuntimeException
     {
         return new self('CONFLICT', $message, 409);
     }
+
+    public static function toomanyrequests(): self{
+        return new self('TOO_MANY_TRYs', 'too many requests on ths email, try again laterr', 429);
+    }
 }

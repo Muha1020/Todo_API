@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Services\AuthService;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -9,22 +12,30 @@ use Illuminate\Http\Response;
 
 class AuthController extends Controller
 {
-
-    //signup endpoint
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request, AuthService $auth): JsonResponse
     {
-        return ApiResponse::success(['id' => 1, 'email' => 'placeholder@example.com'], 201);
+        $user = $auth->register(
+            $request->validated('email'),
+            $request->validated('password'),
+        );
+
+        return ApiResponse::success($user, 201);
     }
 
-    //login
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request, AuthService $auth): JsonResponse
     {
-        return ApiResponse::success(['token' => 'placeholder', 'token_type' => 'Bearer']);
+        $session = $auth->login(
+            $request->validated('email'),
+            $request->validated('password'),
+        );
+
+        return ApiResponse::success($session);
     }
 
-    //and finally logout!
-    public function logout(Request $request): Response
+    public function logout(Request $request, AuthService $auth): Response
     {
+        $auth->logout($request->bearerToken());
+
         return ApiResponse::noContent();
     }
 }
