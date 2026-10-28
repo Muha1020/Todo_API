@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Route;
 
 //test route
 route::get('ping', fn () => ApiResponse::success([
-'pong' => true,
+'Kolawole is active?' => true,
 'time' => now()->utc(),
+'message' =>'this is how i want my test endpoint to read,too much play',
 ]));
 
 //authentication endpoints
