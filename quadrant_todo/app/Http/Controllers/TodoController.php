@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ListTodosRequest;
+use App\Http\Requests\ListTodoRequest;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
 use App\Http\Resources\TodoResource;
@@ -18,7 +18,7 @@ class TodoController extends Controller
  public function __construct(private TodoService $todos) {}
 
 //Get all todos (filter by user_id)
-    public function index(ListTodosRequest $request): JsonResponse
+    public function index(ListTodoRequest $request): JsonResponse
     {
         $result = $this->todos->list(
             $this->userId($request),

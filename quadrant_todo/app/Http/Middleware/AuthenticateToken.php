@@ -16,7 +16,7 @@ class AuthenticateToken
     {
         $userId = $this->auth->authenticate($request->bearerToken());
 
-        $request->attributes->set('user_is', $userId);
+        $request->attributes->set('user_id', $userId);
 
         return $next($request);
     }

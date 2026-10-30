@@ -7,7 +7,7 @@ use App\Rules\RealDate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ListTodosRequest extends FormRequest
+class ListTodoRequest extends FormRequest
 {
     public function authorize(): bool
     {
