@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ListTodoRequest;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
+use App\Http\Requests\BulkCarryOverRequest;
+use App\Http\Requests\CarryOverRequest;
+use App\Http\Requests\PostponeRequest;
 use App\Http\Resources\TodoResource;
 use App\Services\TodoService;
 use App\Support\ApiResponse;
@@ -68,23 +71,43 @@ class TodoController extends Controller
     }
 
     //to perform a cerryover
-    public function carryOver(Request $request, int $id): JsonResponse
-    {
-        return ApiResponse::success(['placeholder' => 'carry-over']);
-    }
+   public function carryOver(CarryOverRequest $request, int $id): JsonResponse
+{
+    $todo = $this->todos->carryOver(
+        $this->userId($request),
+        $id,
+        $request->validated('new_due_date'),
+    );
 
-    //to perform a  bulk carryover or multiple todos
-    public function bulkCarryOver(Request $request): JsonResponse
-    {
-        return ApiResponse::success(['carried_over' => 0, 'items' => []]);
-    }
+    return ApiResponse::success(TodoResource::make($todo)->resolve());
+}
 
-    //to postpone a todo
-    public function postpone(Request $request, int $id): JsonResponse
-    {
-        return ApiResponse::success(['placeholder' => 'postpone']);
-    }
+//for a bulk carry over
+public function bulkCarryOver(BulkCarryOverRequest $request): JsonResponse
+{
+    $items = $this->todos->carryOverDay(
+        $this->userId($request),
+        $request->validated('from_date'),
+        $request->validated('new_due_date'),
+    );
 
+    return ApiResponse::success([
+        'carried_over' => $items->count(),
+        'items' => TodoResource::collection($items)->resolve(),
+    ]);
+}
+
+//to postpone a todo
+public function postpone(PostponeRequest $request, int $id): JsonResponse
+{
+    $todo = $this->todos->postpone(
+        $this->userId($request),
+        $id,
+        $request->validated('new_due_date'),
+    );
+
+    return ApiResponse::success(TodoResource::make($todo)->resolve());
+}
     //the private helper method for the userid
       private function userId(Request $request): int
     {
